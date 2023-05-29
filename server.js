@@ -21,6 +21,7 @@ app.get('/user/:id', getUserById)
 app.put('/image', updateEntries)
 
 app.listen(3001)
+console.log('port is listing on port 3001')
 
 // app.use(express.urlencoded({extended: false}));
 // app.use(express.json());
