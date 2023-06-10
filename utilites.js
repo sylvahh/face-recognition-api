@@ -1,4 +1,7 @@
+const  dotenv = require('dotenv')
+dotenv.config()
 const { Pool, Client } = require('pg');
+
 
  const makeClarifyRequest = async (imageURL) => {
      try {

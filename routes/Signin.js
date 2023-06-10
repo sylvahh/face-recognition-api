@@ -5,13 +5,18 @@ const bcrypt = require('bcrypt');
 
 const signIn = async (request, response) => {
     const { email, password } = request.body;
-    // console.log(request.body)
+  if (!email || !password) {
+    const responseData = {
+      message: 'Email and password required',
+      success: false,
+    };
+    response.status(400).json(responseData);
+  } else {
     const client = await pool.connect();
     console.time('start');
     try {
       await client.query('BEGIN');
       const result = await client.query('SELECT * FROM login WHERE email = $1 ', [email]);
-      // console.log(result)
       if (result.rows.length) {
         const hash = result.rows[0].hash;
   
@@ -25,7 +30,7 @@ const signIn = async (request, response) => {
           const responseData = {
             message: 'Authentication successful',
             success: true,
-            data: {...user, rank: userRank.rows[0].rank },
+            data: { ...user, rank: userRank.rows[0].rank },
           };
           response.status(200).json(responseData);
         } else {
@@ -35,7 +40,7 @@ const signIn = async (request, response) => {
             message: 'Invalid email or password',
           });
         }
-      } 
+      }
     } catch (error) {
       await client.query('ROLLBACK');
       response.status(400).send(error.message);
@@ -44,6 +49,7 @@ const signIn = async (request, response) => {
       await client.end();
       console.timeEnd('start');
     }
+  }
 };
   
 module.exports = {

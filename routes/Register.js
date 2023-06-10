@@ -5,7 +5,14 @@ const bcrypt = require('bcrypt');
 
 
 const createUser = async (request, response) => {
-    const { name, email, password } = request.body;
+  const { name, email, password } = request.body;
+  if (!name || !email || !password) {
+    const responseData = {
+      message: 'all feilds required',
+      success: false,
+    };
+    response.status(400).json(responseData);
+  } else {
     const joined = new Date();
     const hash = bcrypt.hashSync(password, 10);
     await client.connect();
@@ -23,20 +30,20 @@ const createUser = async (request, response) => {
         [name, hash, email, userId]
       );
       // Get the last rank from the user_rank table
-  const  getLastRank  = await client.query(
-    'SELECT rank FROM user_rank ORDER BY rank DESC LIMIT 1'
+      const getLastRank = await client.query(
+        'SELECT rank FROM user_rank ORDER BY rank DESC LIMIT 1'
       );
       const lastRank = getLastRank.rows[0].rank
       const userRank = getLastRank.rows.length ? lastRank + 1 : 1
       const entriesTable = await client.query(
-        'INSERT INTO user_rank (id, email, entries, rank) VALUES ($1, $2, $3, $4)',[ userId, email, userEntries, userRank]
-      ) 
+        'INSERT INTO user_rank (id, email, entries, rank) VALUES ($1, $2, $3, $4)', [userId, email, userEntries, userRank]
+      )
       await client.query('COMMIT');
       const responseData = {
         message: 'User registered successfully',
         success: true,
         rank: lastRank,
-        data: {...result.rows[0], rank: lastRank},
+        data: { ...result.rows[0], rank: lastRank },
       };
       response.status(201).json(responseData);
     } catch (error) {
@@ -46,6 +53,7 @@ const createUser = async (request, response) => {
     } finally {
       await client.end();
     }
+  }
 };
   
 module.exports = {
